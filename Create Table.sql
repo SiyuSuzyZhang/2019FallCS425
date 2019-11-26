@@ -44,8 +44,6 @@ State char(10) NOT NULL,
 Zipcode int(10) NOT NULL,
 PRIMARY KEY(Address_ID));
 
-
-
 CREATE TABLE Order
 (Order_ID int(20) NOT NULL, 
 Order_Price int(20) NOT NULL,
