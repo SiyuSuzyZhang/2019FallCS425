@@ -10,7 +10,7 @@ DROP TABLE Stock;
 
 DROP TABLE Address;
 
-DROP TABLE Order;
+DROP TABLE Order1;
 
 DROP TABLE Shippment;
 
