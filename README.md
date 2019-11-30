@@ -53,10 +53,5 @@ FLUSH PRIVILEGES;
 # Login again with the new user cs425proj
 mysql -u cs425proj -p
 # Import "Create Table.sql"  to initialize databse and import initial data
-mysql -u cs425proj -p < "Create Table.sql"
-```
-
-```sql
-CREATE DATABASE cs425projdb;
-use cs425projdb
+mysql -u cs425proj -p < "sqls/Create Table.sql"
 ```
