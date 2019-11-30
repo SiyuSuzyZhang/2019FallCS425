@@ -1,102 +1,167 @@
-CREATE TABLE Category 
-(Product_Type char(50) NOT NULL, 
-Manufactor char(50) NOT NULL, 
-Package char(50) NOT NULL, 
-Product_ID int(20) NOT NULL, 
-PRIMARY KEY(Product_Type, Manufactor, Package, Product_ID), 
-FOREIGN KEY (Product_ID) REFERENCES Product(Product_ID));
+DROP DATABASE cs425projdb;
+
+CREATE DATABASE cs425projdb;
+
+use cs425projdb;
+
+CREATE TABLE ProductType
+(
+    TypeID INT(5) NOT NULL,
+    TypeName VARCHAR(20) NOT NULL,
+    PRIMARY KEY(TypeID)
+);
+
+LOAD DATA INFILE '/home/siyu/2019FallCS425/initial_data/producttype_dat.csv' INTO TABLE ProductType FIELDS TERMINATED BY ',';
+
+CREATE TABLE Manufacturer
+(
+    ManufacturerID INT(5) NOT NULL,
+    ManufacturerName VARCHAR(20) NOT NULL,
+    PRIMARY KEY(ManufacturerID)
+);
+
+LOAD DATA INFILE '/home/siyu/2019FallCS425/initial_data/manufacturer_dat.csv' INTO TABLE Manufacturer FIELDS TERMINATED BY ',';
+
+CREATE TABLE Package
+(
+    PackageID INT(5) NOT NULL,
+    PackageName VARCHAR(128) NOT NULL,
+    PRIMARY KEY(PackageID)
+);
+
+LOAD DATA INFILE '/home/siyu/2019FallCS425/initial_data/package_dat.csv' INTO TABLE Package FIELDS TERMINATED BY ',';
 
 CREATE TABLE Product 
-(Product_ID int(20) NOT NULL, 
-Product_Name char(50) NOT NULL, 
-Product_Price int(10) NOT NULL, 
-PRIMARY KEY(Product_ID));
+(
+    ProductID INT(10) NOT NULL, 
+    ProductName VARCHAR(50) NOT NULL, 
+    ProductPrice INT(10) NOT NULL, 
+    ManufacturerID INT(5) NOT NULL,
+    PRIMARY KEY(ProductID),
+    FOREIGN KEY (ManufacturerID) REFERENCES Manufacturer(ManufacturerID)
+);
 
-CREATE TABLE Product_Order
-(Product_ID int(20) NOT NULL, 
-Order_ID int(20) NOT NULL,
-PRIMARY KEY(Product_ID, Order_ID),
-FOREIGN KEY (Product_ID) REFERENCES Product(Product_ID),
-FOREIGN KEY (Order_ID) REFERENCES Order1(Order_ID));
-
-CREATE TABLE Inventory
-(Product_ID int(20) NOT NULL, 
-Site_ID int(20) NOT NULL,
-Product_Amount int(10),
-PRIMARY KEY(Product_ID, Site_ID),
-FOREIGN KEY (Product_ID) REFERENCES Product(Product_ID),
-FOREIGN KEY (Site_ID) REFERENCES Stock(Site_ID));
-
-CREATE TABLE Stock 
-(Site_ID int(20) NOT NULL, 
-Stock_Type char(20) NOT NULL, 
-Address_ID char(10) NOT NULL,
-PRIMARY KEY(Site_ID),
-FOREIGN KEY (Address_ID) REFERENCES Address(Address_ID));
+LOAD DATA INFILE '/home/siyu/2019FallCS425/initial_data/product_dat.csv' INTO TABLE Product FIELDS TERMINATED BY ',';
 
 CREATE TABLE Address
-(Address_ID char(10) NOT NULL,
-Address_Line_1 char(30) NOT NULL,
-Address_Line_2 char(30),
-City char(10) NOT NULL,
-State char(10) NOT NULL,
-Zipcode int(10) NOT NULL,
-PRIMARY KEY(Address_ID));
+(
+    AddressID INT(10) NOT NULL,
+    StreetNumber VARCHAR(10) NOT NULL,
+    Street VARCHAR(64) NOT NULL,
+    Line2 VARCHAR(64) DEFAULT NULL,
+    City VARCHAR(32) NOT NULL,
+    State VARCHAR(10) NOT NULL,
+    Zipcode VARCHAR(6) NOT NULL,
+    PRIMARY KEY(AddressID)
+);
 
+LOAD DATA INFILE '/home/siyu/2019FallCS425/initial_data/address_dat.csv' INTO TABLE Address FIELDS TERMINATED BY ',';
 
+CREATE TABLE Stock
+(
+    SiteID INT(5) NOT NULL, 
+    StockType VARCHAR(10) NOT NULL, 
+    AddressID INT(10) DEFAULT NULL,
+    PRIMARY KEY (SiteID),
+    FOREIGN KEY (AddressID) REFERENCES Address(AddressID)
+);
 
-CREATE TABLE Order1
-(Order_ID int(20) NOT NULL, 
-Order_Price int(20) NOT NULL,
-Order_Type char(20) NOT NULL,  
-Address_ID char(10) NOT NULL,
-Customer_ID int(10),
-Card_Num int(20) NOT NULL,
-PRIMARY KEY(Order_ID),
-FOREIGN KEY (Address_ID) REFERENCES Address(Address_ID),
-FOREIGN KEY (Customer_ID) REFERENCES Customer(Customer_ID),
-FOREIGN KEY (Card_Num) REFERENCES Card(Card_Num));
+LOAD DATA INFILE '/home/siyu/2019FallCS425/initial_data/site_dat.csv' INTO TABLE Stock FIELDS TERMINATED BY ',';
 
-CREATE TABLE Shippment
-(Tracking_Num int(20),
-ShipperName char(20) NOT NULL,
-Order_ID int(20) NOT NULL,
-PRIMARY KEY(Tracking_Num),
-FOREIGN KEY (Order_ID) REFERENCES Order1(Order_ID));
-
-CREATE TABLE Address_Cumtomer
-(Address_ID char(10) NOT NULL,
-Customer_ID int(10),
-PRIMARY KEY(Address_ID, Customer_ID),
-FOREIGN KEY (Address_ID) REFERENCES Address(Address_ID),
-FOREIGN KEY (Customer_ID) REFERENCES Customer(Customer_ID));
 
 CREATE TABLE Customer
-(Customer_ID int(10),
-Firstname char(10),
-Lastname char(10),
-Phone_num int(15),
-PRIMARY KEY(Customer_ID));
+(
+    CustomerID INT(10) NOT NULL,
+    FirstName VARCHAR(10) NOT NULL,
+    LastName VARCHAR(10) NOT NULL,
+    PhoneNumber VARCHAR(15),
+    AccountNumber CHAR(10) NOT NULL UNIQUE,
+    Username VARCHAR(32) NOT NULL,
+    Password VARCHAR(64) NOT NULL,
+    Email VARCHAR(64),
+    PRIMARY KEY(CustomerID)
+);
 
-
-CREATE TABLE Account
-(Account_Num int(10),
-Username char(10),
-Password char(10),
-Email char(20),
-Customer_ID int(10),
-PRIMARY KEY(Account_Num),
-FOREIGN KEY (Customer_ID) REFERENCES Customer(Customer_ID));
-
-CREATE TABLE Customer_Card
-(Customer_ID int(10),
-Card_Num int(20) NOT NULL,
-PRIMARY KEY(Customer_ID, Card_Num),
-FOREIGN KEY (Customer_ID) REFERENCES Customer(Customer_ID),
-FOREIGN KEY (Card_Num) REFERENCES Card(Card_Num));
+LOAD DATA INFILE '/home/siyu/2019FallCS425/initial_data/customer_dat.csv' INTO TABLE Customer FIELDS TERMINATED BY ',';
 
 CREATE TABLE Card
-(Card_Num int(20) NOT NULL,
-Card_Type char(10) NOT NULL,
-Creditline int (15),
-PRIMARY KEY(Card_Num));
+(
+    CardNum CHAR(16) NOT NULL,
+    CardType VARCHAR(8) NOT NULL,
+    Credit INT (15),
+    PRIMARY KEY(CardNum)
+);
+
+LOAD DATA INFILE '/home/siyu/2019FallCS425/initial_data/card_dat.csv' INTO TABLE Card FIELDS TERMINATED BY ',';
+
+CREATE TABLE Inventory
+(
+    ProductID INT(10) NOT NULL, 
+    SiteID INT(10) NOT NULL,
+    ProductAmount INT(10) NOT NULL DEFAULT 0,
+    PRIMARY KEY(ProductID, SiteID),
+    FOREIGN KEY (ProductID) REFERENCES Product(ProductID),
+    FOREIGN KEY (SiteID) REFERENCES Stock(SiteID)
+);
+
+LOAD DATA INFILE '/home/siyu/2019FallCS425/initial_data/inventory_dat.csv' INTO TABLE Inventory FIELDS TERMINATED BY ',';
+
+CREATE TABLE CusOrder
+(
+    OrderID INT(20) NOT NULL, 
+    OrderPrice INT(20) NOT NULL,
+    SiteID INT(10) NOT NULL,
+
+    TrackingNumber CHAR(8) NOT NULL UNIQUE,
+    ShipperName VARCHAR(20) NOT NULL,
+    
+    CustomerID INT(10) DEFAULT NULL,
+    
+    AddressID INT(10) NOT NULL,
+    
+    CardNum CHAR(16) NOT NULL,
+    
+    OrderTime DATETIME NOT NULL,
+    FOREIGN KEY (SiteID) REFERENCES Stock(SiteID),
+    FOREIGN KEY (AddressID) REFERENCES Address(AddressID),
+    FOREIGN KEY (CardNum) REFERENCES Card(CardNum),
+    FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID),
+    PRIMARY KEY(OrderID)
+);
+
+LOAD DATA INFILE '/home/siyu/2019FallCS425/initial_data/cusorder_dat.csv' INTO TABLE CusOrder FIELDS TERMINATED BY ',';
+
+CREATE TABLE OrderFor
+(
+    OrderID INT(10) NOT NULL,
+    ProductID INT(10) NOT NULL, 
+    Amount INT(10) NOT NULL,
+    PRIMARY KEY(ProductID, OrderID),
+    FOREIGN KEY (ProductID) REFERENCES Product(ProductID),
+    FOREIGN KEY (OrderID) REFERENCES CusOrder(OrderID)
+);
+
+LOAD DATA INFILE '/home/siyu/2019FallCS425/initial_data/orderfor_dat.csv' INTO TABLE OrderFor FIELDS TERMINATED BY ',';
+
+CREATE TABLE ProductTypeR
+(
+    ProductID INT(10) NOT NULL,
+    TypeID INT(5) NOT NULL,
+    PRIMARY KEY (ProductID, TypeID),
+    FOREIGN KEY (ProductID) REFERENCES Product(ProductID),
+    FOREIGN KEY (TypeID) REFERENCES ProductType(TypeID)
+);
+
+LOAD DATA INFILE '/home/siyu/2019FallCS425/initial_data/producttyper_dat.csv' INTO TABLE ProductTypeR FIELDS TERMINATED BY ',';
+
+CREATE TABLE PackageProduct
+(
+    PackageID INT(5) NOT NULL,
+    ProductID INT(10) NOT NULL,
+    PRIMARY KEY (PackageID, ProductID),
+    FOREIGN KEY (PackageID) REFERENCES Package(PackageID),
+    FOREIGN KEY (ProductID) REFERENCES Product(ProductID)
+);
+
+LOAD DATA INFILE '/home/siyu/2019FallCS425/initial_data/packageproduct_dat.csv' INTO TABLE PackageProduct FIELDS TERMINATED BY ',';
+

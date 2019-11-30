@@ -30,7 +30,7 @@ Install requirement.txt
 pip install -r requirements.txt
 ```
 
-### 3. Database
+### 1.3. Database
 
 We are using MySQL, and import an SQL file which includes database, table
 creations and initial data importing.
