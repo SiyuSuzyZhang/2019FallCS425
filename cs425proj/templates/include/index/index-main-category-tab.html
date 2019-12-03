@@ -1,0 +1,30 @@
+<div class="category-tab"><!--category-tab-->
+    <div class="col-sm-12">
+        <ul class="nav nav-tabs">
+            {% for feat_type in featured_types %}
+                <li {% if forloop.first %}class='active'{% endif %}><a href="#{{feat_type.id}}" data-toggle="tab">{{feat_type.name}}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="tab-content">
+        {% for feat_type in featured_types %}
+        <div class="tab-pane fade {% if forloop.first %}active in{% endif %}" id="{{feat_type.id}}" >
+            {% for prod in feat_type.prods %}
+                <div class="col-sm-3">
+                    <div class="product-image-wrapper">
+                        <div class="single-products">
+                            <div class="productinfo text-center">
+                                <img src="images/home/gallery1.jpg" alt="" />
+                                <h2>$ {{prod.2}}</h2>
+                                <p>{{prod.1}}</p>
+                                <a href="#" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Add to cart</a>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+</div><!--/category-tab-->
