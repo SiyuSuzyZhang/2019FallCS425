@@ -30,7 +30,12 @@ urlpatterns = [
     re_path(r'^shop/(?P<siteid>[0-9]{5})/ptype/(?P<ptype>[0-9]{5})/(?:page-(?P<page>\d+)/)$', views.shop, name='shop'),
     re_path(r'^shop/(?P<siteid>[0-9]{5})/manu/(?P<manu>[0-9]{5})/$', views.shop, name='shop'),
     re_path(r'^shop/(?P<siteid>[0-9]{5})/manu/(?P<manu>[0-9]{5})/(?:page-(?P<page>\d+)/)$', views.shop, name='shop'),
+    re_path(r'^order/(?P<orderid>[0-9]{7})/(?P<paycard>[0-9]{16})/$', views.orderdetail, name='order'),
+    re_path(r'^order/(?P<orderid>[0-9]{7})/$', views.orderdetail, name='order'),
+    re_path(r'^order/$', views.orderlist, name='order'),
     path('account/checkout_confirm_account/', views.checkout_confirm_account, name='account'),
     path('logout/', views.logout, name='account'),
     path('admin/', admin.site.urls),
+    re_path(r'shop/(?P<siteid>[0-9]{5})/login/$', views.login, name='account'),
+    re_path(r'shop/(?P<siteid>[0-9]{5})/doLoginOrSignup/$', views.doLoginOrSignup, name='account'),
 ]

@@ -15,11 +15,18 @@
                     <div class="shop-menu pull-right">
                         <ul class="nav navbar-nav">
                             <li><a href="{% if request.session.loggedin %}/account/{%else%}/login/{%endif%}"><i class="fa fa-user"></i> Account</a></li>
-                            <li><a href="/shop/{{shopat}}/cart" {% if subloc == 'Cart' %} class='active' {% endif %}><i class="fa fa-shopping-cart"></i>Cart ( <span id='items_in_cart'>{{items_in_cart}}</span> )</a></li>
+                            <li><a href="
+                                {% if request.session.cart.siteid %}/shop/{{request.session.cart.siteid}}/cart/{%else%}
+                                /shop/10001/cart/
+                                {%endif%}" {% if subloc == 'Cart' %} class='active' {% endif %}><i class="fa fa-shopping-cart"></i>Cart ( <span id='items_in_cart'>{% if request.session.cart.total %}{{request.session.cart.total}}{%else%}0{%endif%}</span> )</a></li>
                             {% if request.session.loggedin %}
                             <li><a href="/logout/"><i class="fa fa-lock"></i> Logout</a></li>
                             {% else %}
-                            <li><a href="/login/"><i class="fa fa-lock"></i> Login</a></li>
+                            <li><a href="
+                                {% if request.session.cart.siteid %}/shop/{{request.session.cart.siteid}}/login/{%else%}
+                                /shop/10001/login/
+                                {%endif%}"
+                                "><i class="fa fa-lock"></i> Login / Signup</a></li>
                             {% endif %}
                         </ul>
                     </div>
@@ -45,8 +52,8 @@
                         <ul class="nav navbar-nav collapse navbar-collapse">
                             <li><a href="/" {% if siteloc == 'Showcase' %}class="active"{%endif%}>Showcase</a></li>
                             <li class="dropdown">
-                                <a href="#" {% if siteloc == 'Shop' %} class="active"{% endif %}>
-                                {% if siteloc == 'Shop' %}
+                                <a href="#" {% if siteloc == 'Shop' or siteloc == 'Login/Signup' %} class="active"{% endif %}>
+                                {% if siteloc == 'Shop'  or siteloc == 'Login/Signup'%}
                                     {% for site in sites %}
                                         {% if shopat == site.0 %} 
                                         Shopping at {{site.1}} {% if site.2 %} @ {{site.2}}, {{site.3}} {% endif %}

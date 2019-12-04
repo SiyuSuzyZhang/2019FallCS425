@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+    <section id="cart_items">
+        <div class="container">
+            <div class="breadcrumbs">
+                <ol class="breadcrumb">
+                  <li><a href="#">Order</a></li>
+                  <li class="active">{{order.OrderID}}</li>
+                </ol>
+            </div>
+            <h3>Dear {{order.cusname}}, thank you for your order!</h3>
+            <div class="table-responsive cart_info">
+                <table class="table table-condensed">
+                    <thead>
+                        <tr class="cart_menu">
+                            <td class="image">Item</td>
+                            <td class="description"></td>
+                            <td class="price">Unit Price</td>
+                            <td class="quantity">Quantity</td>
+                            <td class="total">Total</td>
+                            <td></td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in order_items %}
+                        <tr>
+                            <td class="cart_product">
+                                <!-- <a href=""><img src="images/cart/one.png" alt=""></a> -->
+                            </td>
+                            <td class="cart_description">
+                                <h4><a href="">{{ item.1 }}</a></h4>
+                                <p>Product ID: {{ item.0 }}</p>
+                            </td>
+                            <td class="cart_price">
+                                <p>$ {{ item.2 }}</p>
+                            </td>
+                            <td class="cart_quantity">
+                                <p>{{ item.3 }}</p>
+                            </td>
+                            <td class="cart_total">
+                                <p class="cart_total_price">$ {{ item.4 }}</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section> <!--/#cart_items-->
+
+    <section id="do_action">
+        <div class="container">
+            <div class="heading">
+                <h3>{% if order.SiteID == 10001 %}Shipped: {{order.TrackingNumber}} {{order.ShipperName}}
+                    {% else %} Completed {%endif%}
+                </h3>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="total_area">
+                        <ul>
+                            <li>Payment Method: <span>{{order.payment}}</span></li>
+                            <li>Order Type:  <span>{{order.ordertype}}</span></li>
+                            <li>
+                                {% if order.SiteID == 10001 %}
+                                Ship to:<br/>
+                                {% else %}
+                                At Store:<br/>
+                                {% endif %}
+                                {{addr_info.address1}}<br/>
+                                {{addr_info.address2}}<br/>
+                                {{addr_info.city}}<br/>
+                                {{addr_info.state}}<br/>
+                                {{addr_info.zipcode}}
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="total_area">
+                        <ul>
+                            <li>Cart Sub Total <span>$ {{order.OrderPrice}}</span></li>
+                            <li>Eco Tax <span>$ 0</span></li>
+                            <li>Shipping Cost <span>Free</span></li>
+                            <li>Total <span>$ {{order.OrderPrice}}</span></li>
+						</ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section><!--/#do_action-->
+
+{% endblock %}

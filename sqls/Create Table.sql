@@ -1,4 +1,4 @@
-DROP DATABASE cs425projdb;
+DROP DATABASE IF EXISTS cs425projdb;
 
 CREATE DATABASE cs425projdb;
 
@@ -76,7 +76,7 @@ CREATE TABLE Customer
     LastName VARCHAR(10) NOT NULL,
     PhoneNumber VARCHAR(15),
     AccountNumber CHAR(10) NOT NULL UNIQUE,
-    Username VARCHAR(32) NOT NULL,
+    Username VARCHAR(32) NOT NULL UNIQUE,
     Password VARCHAR(64) NOT NULL,
     Email VARCHAR(64),
     PRIMARY KEY(CustomerID)
