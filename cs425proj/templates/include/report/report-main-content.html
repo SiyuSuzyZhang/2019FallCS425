@@ -1,0 +1,13 @@
+
+<div class="col-sm-9">
+    <div class="blog-post-area">
+        <h2 class="title text-center">Report</h2>
+        {% for report in report_data %}
+        <div class="single-blog-post">
+                <h3>{{report.reporttitle}}</h3>
+                <svg height="500" width="500" id="{{report.reportid}}"></svg>
+        </div>
+        <hr/>
+        {% endfor %}
+    </div>
+</div>

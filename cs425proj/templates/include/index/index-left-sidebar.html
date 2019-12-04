@@ -36,6 +36,25 @@
                     <h4 class="panel-title"><a href="/shop/{{shopat}}/">All</a></h4>
                 </div>
             </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" data-parent="#accordian" href="#packages">
+                            <span class="badge pull-right"><i class="fa fa-plus"></i></span>
+                            Packages
+                        </a>
+                    </h4>
+                </div>
+                <div id="packages" class="panel-collapse collapse">
+                    <div class="panel-body">
+                        <ul>
+                            {% for package in packages %}
+                            <li><a href="/shop/{{shopat}}/package/{{package.0}}">{{package.1}}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
             {% for ptype in productTypes %}
                 <div class="panel panel-default">
                     <div class="panel-heading">

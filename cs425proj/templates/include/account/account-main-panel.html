@@ -1,0 +1,12 @@
+
+
+{% if siteloc == 'Account' %}
+{% include 'include/account/account-main-info.html' %}
+{% endif %}
+
+{% if siteloc == 'My Orders' %}
+{% include 'include/account/account-main-orders.html' %}
+{% endif %}
+{% if siteloc == 'Monthly Bills' %}
+{% include 'include/account/account-main-bills.html' %}
+{% endif %}

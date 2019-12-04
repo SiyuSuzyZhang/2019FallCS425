@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+<section>
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-3">
+                {% include 'include/report/report-left-sidebar.html' %}
+            </div>
+            
+            <div class="col-sm-9 padding-right">
+				{% include 'include/report/report-main-content.html' %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}
+
+{% block cus-js-1 %}
+<script src="https://d3js.org/d3.v5.min.js"></script>
+
+<script>
+    margin = ({top: 20, right: 30, bottom: 30, left: 80})
+
+    chart = function(drawid, data){    
+        const svg = d3.selectAll(drawid);
+        svg.attr("width", 800);
+        width = svg.attr("width");
+        height = svg.attr("height");
+        
+        svg.attr("viewBox", [0, 0, width, height]);
+        
+        yAxis = g => g
+                .attr("transform", `translate(${margin.left},0)`)
+                .call(d3.axisLeft(y))
+                .call(g => g.select(".domain").remove())
+                .call(g => g.select(".tick:last-of-type text").clone()
+                    .attr("x", 3)
+                    .attr("text-anchor", "start")
+                    .attr("font-weight", "bold")
+                    .text(data.y))
+                    xAxis = g => g
+                .attr("transform", `translate(0,${height - margin.bottom})`)
+                .call(d3.axisBottom(x).ticks(width / 80).tickSizeOuter(0))
+
+        
+        y = d3.scaleLinear()
+            .domain([d3.min(data, d => d.value), d3.max(data, d => d.value)]).nice()
+            .range([height - margin.bottom, margin.top])
+
+        x = d3.scaleUtc()
+            .domain(d3.extent(data, d => d.date))
+            .range([margin.left, width - margin.right])
+        line = d3.line()
+            .defined(d => !isNaN(d.value))
+            .x(d => x(d.date))
+            .y(d => y(d.value))
+
+        svg.append("g")
+            .call(xAxis);
+
+        svg.append("g")
+            .call(yAxis);
+        
+        svg.append("path")
+            .datum(data)
+            .attr("fill", "none")
+            .attr("stroke", "steelblue")
+            .attr("stroke-width", 1.5)
+            .attr("stroke-linejoin", "round")
+            .attr("stroke-linecap", "round")
+            .attr("d", line);
+        
+        return svg.node();
+    }
+    {% for report in report_data %}
+        dat = "{{ report.data|safe}}";
+        datarray =  Object.assign((d3.csvParse(dat, d3.autoType)).map(({date, sales}) => ({date, value: sales})), {y: "% Diff to Last Month"})
+        chart("#{{report.reportid}}", datarray);
+    {% endfor %}
+  </script>
+{% endblock cus-js-1 %}

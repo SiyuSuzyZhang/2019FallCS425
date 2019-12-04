@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
 # Create your views here.
 from django.http import HttpResponse, HttpResponseRedirect
@@ -31,6 +31,16 @@ def get_all_product_types(context=None):
     context['productTypes'] = productTypes
     return context
 
+def get_all_packages(context=None):
+    if context is None:
+        context = {}
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT * FROM Package ORDER BY PackageName")
+        rows = cursor.fetchall()
+    packages = [(row[0], row[1].strip()) for row in rows]
+    context['packages'] = packages
+    return context
+
 def get_all_manufacturers(context=None):
     with connection.cursor() as cursor:
         cursor.execute("""
@@ -49,6 +59,7 @@ def index(request):
     context = {}
     context = get_all_product_types(context)
     context = get_all_manufacturers(context)
+    context = get_all_packages(context)
     
     with connection.cursor() as cursor:
         cursor.execute("""
@@ -135,8 +146,16 @@ def check_cart_switch(session, siteid):
             'prods': {},
             'total': 0
         }
+    # also clean up prods that have zero quantities
+    mycart = session['cart']
+    prodids = list(mycart['prods'].keys())
+    for prodid in prodids:
+        v = mycart['prods'][prodid]
+        if v == 0:
+            del mycart['prods'][prodid]
+    session['cart'] = mycart
 
-def shop(request, siteid=10001, ptype=0, manu=0, page=1):
+def shop(request, siteid=10001, ptype=0, manu=0, pack=0, page=1):
     session = request.session
     check_cart_switch(session, siteid)
     items_in_cart = session['cart']['total']
@@ -145,11 +164,13 @@ def shop(request, siteid=10001, ptype=0, manu=0, page=1):
     ptype = int(ptype)
     manu = int(manu)
     page = int(page)
+    pack = int(pack)
     context = get_stock_sites()
     context = get_all_product_types(context)
     context = get_all_manufacturers(context)
+    context = get_all_packages(context)
     items_per_page = 18
-    if ptype ==0 and manu == 0:
+    if ptype ==0 and manu == 0 and pack == 0:
         with connection.cursor() as cursor:
             cursor.execute("SELECT count(*) FROM Product")
             anum = cursor.fetchone()
@@ -193,7 +214,7 @@ def shop(request, siteid=10001, ptype=0, manu=0, page=1):
             rows = cursor.fetchall()
         products = [(row[0], row[1].strip(), row[2], row[3]) for row in rows]
         context['bytype'] = ptype
-    else:
+    elif manu != 0:
         with connection.cursor() as cursor:
             cursor.execute("""
                     SELECT count(*) 
@@ -215,6 +236,30 @@ def shop(request, siteid=10001, ptype=0, manu=0, page=1):
             rows = cursor.fetchall()
         products = [(row[0], row[1].strip(), row[2], row[3]) for row in rows]
         context['bymanu'] = manu
+    elif pack != 0:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                    SELECT count(*) 
+                    FROM Product 
+                    JOIN PackageProduct USING (ProductID)
+                    WHERE PackageID = {}""".format(pack))
+            anum = cursor.fetchone()
+        num_prods = anum[0]
+        totalpages = math.ceil(1.0*num_prods/items_per_page)
+        if page <= 0 or page > totalpages:
+            page = 1
+        start_index = (page-1)*items_per_page
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT ProductID, ProductName, ProductPrice, ProductAmount
+                FROM Product
+                JOIN PackageProduct USING(ProductID)
+                LEFT JOIN Inventory USING(ProductID)
+                WHERE PackageID = {} AND Inventory.SiteID = {}
+                LIMIT {}, {}""".format(pack, siteid, start_index, items_per_page))
+            rows = cursor.fetchall()
+        products = [(row[0], row[1].strip(), row[2], row[3]) for row in rows]
+        context['bypack'] = pack
 
     context['products'] = products
 
@@ -223,6 +268,8 @@ def shop(request, siteid=10001, ptype=0, manu=0, page=1):
         cururl += '/ptype/{}'.format(ptype)
     elif manu:
         cururl += '/manu/{}'.format(manu)
+    elif pack:
+        cururl += '/package/{}'.format(pack)
     context['cururl'] = cururl
     context['items_in_cart'] = items_in_cart
     context['siteloc'] = 'Shop'
@@ -236,6 +283,8 @@ def shop(request, siteid=10001, ptype=0, manu=0, page=1):
 def checkout(request, siteid=10001):
     session = request.session
     check_cart_switch(session, siteid)
+    if session['cart']['total'] == 0:
+        return redirect('/shop/{}/'.format(siteid))
     context = {}
     context = get_stock_sites(context)
     mycart = session['cart']
@@ -447,10 +496,28 @@ def cart(request, siteid=10001):
         action = post_data['action']
         prodid = post_data['prodid']
         if action == 'add_one':
-            if prodid not in session['cart']['prods']:
-                session['cart']['prods'][prodid] = 0
-            session['cart']['prods'][prodid] += 1
-            session['cart']['total'] += 1
+            prodids = prodid.split("-")
+            for prodid in prodids:
+                if prodid not in mycart['prods']:
+                    mycart['prods'][prodid] = 0
+                mycart['prods'][prodid] += 1
+                mycart['total'] += 1
+        elif action == 'minus_one':
+            if prodid not in mycart['prods']:
+                mycart['prods'][prodid] = 0
+
+            mycart['prods'][prodid] -= 1
+            if mycart['prods'][prodid] <= 0:
+                mycart['prods'][prodid] = 0
+
+            mycart['total'] -= 1
+            if mycart['total'] <= 0:
+                mycart['total'] = 0
+
+        elif action == 'remove':
+            if prodid in mycart['prods']:
+                mycart['total'] -= mycart['prods'][prodid]
+                del mycart['prods'][prodid]
         session['cart'] = mycart
         ret_dat = json.dumps(mycart)
         return HttpResponse(ret_dat, content_type='application/json')
@@ -520,6 +587,7 @@ def checkout_confirm_account(request):
                     'PhoneNumber': row[3],
                     'AccountNumber': row[4],
                     'Username': row[5],
+                    'Email': row[7],
                 }
                 session['loggedin'] = True
             except:
@@ -548,6 +616,7 @@ def checkout_confirm_account(request):
                     'PhoneNumber': row[3],
                     'AccountNumber': row[4],
                     'Username': row[5],
+                    'Email': row[7],
                 }
                 session['loggedin'] = True
             except:
@@ -651,9 +720,6 @@ def orderdetail(request, orderid=None, paycard=None):
     context['siteloc'] = 'Order'
     return render(request, 'cs425proj/order-detail.html', context)
 
-def orderlist(request):
-    return None
-
 def login(request, siteid=10001):
     context = {}
     context = get_stock_sites(context)
@@ -678,8 +744,6 @@ def doLoginOrSignup(request, siteid=10001):
                 lastname = post_data['lastname'].strip()
                 username = post_data['username'].strip()
                 password = post_data['password'].strip()
-                print(post_data)
-                print(firstname, lastname, username, password)
                 if len(firstname) == 0 or len(lastname) == 0 or len(username) == 0 or len(password) == 0:
                     raise Exception(999, "Invalid information")
                 import random
@@ -705,6 +769,7 @@ def doLoginOrSignup(request, siteid=10001):
                     'PhoneNumber': row[3],
                     'AccountNumber': row[4],
                     'Username': row[5],
+                    'Email': row[7],
                 }
                 session['loggedin'] = True
             elif action == 'login':
@@ -729,6 +794,7 @@ def doLoginOrSignup(request, siteid=10001):
                         'PhoneNumber': row[3],
                         'AccountNumber': row[4],
                         'Username': row[5],
+                        'Email': row[7],
                     }
                     session['loggedin'] = True
                 elif 'username' in post_data and 'password' in post_data:
@@ -752,6 +818,7 @@ def doLoginOrSignup(request, siteid=10001):
                         'PhoneNumber': row[3],
                         'AccountNumber': row[4],
                         'Username': row[5],
+                        'Email': row[7],
                     }
                     session['loggedin'] = True
             success = True
@@ -764,3 +831,274 @@ def doLoginOrSignup(request, siteid=10001):
             'info': info
         })
         return HttpResponse(ret_dat, content_type='application/json')
+@csrf_exempt
+def account(request):
+    session = request.session
+    context = {}
+    context = get_stock_sites(context)
+    context['siteloc'] = 'Account'
+    if not (session.has_key('loggedin') and session['loggedin']):
+        if session.has_key('cart'):
+            siteid = session['cart']['siteid']
+        else:
+            siteid = 10001
+        return redirect('/shop/{}/login/'.format(siteid))
+    if request.method == 'POST':
+        post_data = request.POST.dict()
+        try:
+            with transaction.atomic():
+                with connection.cursor() as cursor:
+                    for key, v in post_data.items():
+                        sql = """
+                        UPDATE Customer
+                        SET {} = '{}'
+                        WHERE CustomerID = {}
+                        """.format(key, v, session['user']['CustomerID'])
+                        cursor.execute(sql)
+            user = session['user']
+            for key, v in post_data.items():
+                if key != 'Password':
+                    user[key] = v
+            session['user'] = user
+        except:
+            pass
+        return HttpResponse(json.dumps("Done"), content_type='application/json')
+    return render(request, "cs425proj/account.html", context)
+
+
+def orderlist(request, page=1):
+    page = int(page)
+    session = request.session
+    if not (session.has_key('loggedin') and session['loggedin']):
+        if session.has_key('cart'):
+            siteid = session['cart']['siteid']
+        else:
+            siteid = 10001
+        return redirect('/shop/{}/login/'.format(siteid))
+    else:
+        cusid = session['user']['CustomerID']
+    context = {}
+    context = get_stock_sites(context)
+    context['siteloc'] = 'My Orders'
+    order_per_page = 7
+    sql_count = """
+            SELECT count(*)
+            FROM CusOrder
+            WHERE CustomerID = {}
+            ORDER BY OrderTime DESC
+        """.format(cusid)
+    with connection.cursor() as cursor:
+        cursor.execute(sql_count)
+        total_orders = cursor.fetchone()[0]
+    totalpages = math.ceil(1.0*total_orders/order_per_page)
+    start_index = (page-1)*order_per_page
+    sql = """
+        SELECT *
+        FROM CusOrder
+        WHERE CustomerID = {}
+        ORDER BY OrderTime DESC
+        LIMIT {}, {}
+    """.format(cusid, start_index, order_per_page)
+    with connection.cursor() as cursor:
+        cursor.execute(sql)
+        rows = cursor.fetchall()
+    all_orders = [
+        {
+            'OrderID': row[0],
+            'OrderPrice': row[1],
+            'SiteID': row[2],
+            'TrackingNumber': row[3],
+            'ShipperName': row[4],
+            'CustomerID': row[5],
+            'AddressID': row[6],
+            'CardNum': row[7],
+            'OrderTime': row[8],
+            'OrderType': 'Online' if row[2] == 10001 else 'In-Store', 
+            'OrderJustTime':row[8].time(),
+            'OrderDate': row[8].date()
+        } for row in rows
+    ]
+    context['all_orders'] = all_orders
+    context['prevpage'] = page-1
+    context['curpage'] = page
+    context['nextpage'] = page+1 if page + 1 <= totalpages else -1
+    context['pages'] = list(range(1, totalpages+1))
+    context['cururl'] = '/account/orders'
+
+    
+    return render(request, "cs425proj/account.html", context)
+
+def report(request):
+    sql = """
+        SELECT State, Count(*)
+        FROM 
+        (
+            SELECT State
+            FROM CusOrder
+            INNER JOIN Address USING (AddressID)
+            UNION ALL
+            SELECT State
+            FROM CusOrder
+            INNER JOIN Stock USING (SiteID)
+            INNER JOIN Address ON Stock.AddressID = Address.AddressID
+            WHERE Stock.StockType = 'store'
+        ) tmpt
+        GROUP BY State;
+    """
+    with connection.cursor() as cursor:
+        cursor.execute(sql)
+        rows = cursor.fetchall()
+    data1 = [
+        {
+            "name": row[0],
+            "value": row[1]
+        } for row in rows
+    ]
+    
+    sql = """
+        SELECT State, AVG(OrderPrice)
+        FROM 
+        (
+            SELECT State, OrderPrice
+            FROM CusOrder
+            INNER JOIN Address USING (AddressID)
+            UNION ALL
+            SELECT State, OrderPrice
+            FROM CusOrder
+            INNER JOIN Stock USING (SiteID)
+            INNER JOIN Address ON Stock.AddressID = Address.AddressID
+            WHERE Stock.StockType = 'store'
+        ) tmpt
+        GROUP BY State;
+    """
+    with connection.cursor() as cursor:
+        cursor.execute(sql)
+        rows = cursor.fetchall()
+    data2 = [
+        {
+            "name": row[0],
+            "value": float(row[1]),
+        } for row in rows
+    ]
+    
+    context = {}
+    context = get_stock_sites(context)
+    context['siteloc'] = "Report"
+    context['report_data'] = [
+        {
+            "reportid": "report-1",
+            "reporttitle": "(Online/In-store) Orders by State",
+            "data": data1},
+        {
+            "reportid": "report-2",
+            "reporttitle": "(Online/In-store) Sales Per Order by State",
+            "data": data2
+            }
+    ]
+    return render(request, "cs425proj/report.html", context);
+
+def report1(request):
+    sql = """
+    SELECT DATE(OrderTime) as OrderDate, SUM(OrderPrice)
+    FROM CusOrder
+    GROUP BY OrderDate 
+    ORDER BY OrderDate ASC;
+    """
+    with connection.cursor() as cursor:
+        cursor.execute(sql)
+        rows = cursor.fetchall()
+    data1 = "date,sales\\n"
+    for row in rows:
+        data1+= "{},{}\\n".format(str(row[0]), int(row[1]))
+    
+    context = {}
+    context = get_stock_sites(context)
+    context['siteloc'] = "Report"
+    context['report_data'] = [
+        {
+            "reportid": "report-1",
+            "reporttitle": "Sales by Date",
+            "data": data1
+        }
+    ]
+    return render(request, "cs425proj/report1.html", context);
+
+def report2(request):
+    sql = """
+    with OrderPriceLast(OrderTime, LastPrice) AS 
+        (
+            SELECT DATE_ADD(OrderTime, INTERVAL 1 MONTH), 
+                OrderPrice 
+            From CusOrder
+        ),
+        OrderPriceThis(OrderTIme, ThisPrice) AS
+        (
+            SELECT OrderTime, OrderPrice
+            From CusOrder
+        )
+    SELECT ThisPrices.OrderYear, ThisPrices.OrderMonth, (ThisSales - LastSales)/ThisSales*100
+    FROM
+    (
+        SELECT YEAR(OrderTime) AS OrderYear, MONTH(OrderTime) as OrderMonth, SUM(ThisPrice) as ThisSales
+        FROM OrderPriceThis
+        GROUP BY OrderYear, OrderMonth
+    ) ThisPrices
+    INNER JOIN
+    (
+        SELECT YEAR(OrderTime) AS OrderYear, MONTH(OrderTime) as OrderMonth, SUM(LastPrice) as LastSales
+        FROM OrderPriceLast
+        GROUP BY OrderYear, OrderMonth
+    ) LastPrices
+    ON ThisPrices.OrderYear = LastPrices.OrderYear AND ThisPrices.OrderMonth = LastPrices.OrderMonth
+    """
+    with connection.cursor() as cursor:
+        cursor.execute(sql)
+        rows = cursor.fetchall()
+    data1 = "date,sales\\n"
+    numnow = len(rows)
+    i = 0
+    for row in rows:
+        if i == numnow-1:
+            break
+        data1+= "{}-{:02d}-01,{}\\n".format(row[0],row[1], float(row[2]))
+        i+=1
+    
+    context = {}
+    context = get_stock_sites(context)
+    context['siteloc'] = "Report"
+    context['report_data'] = [
+        {
+            "reportid": "report-1",
+            "reporttitle": "Sale Changes",
+            "data": data1
+        }
+    ]
+    return render(request, "cs425proj/report2.html", context);
+
+def bills(request):
+    session = request.session
+    if not (session.has_key('loggedin') and session['loggedin']):
+        if session.has_key('cart'):
+            siteid = session['cart']['siteid']
+        else:
+            siteid = 10001
+        return redirect('/shop/{}/login/'.format(siteid))
+    else:
+        cusid = session['user']['CustomerID']
+    
+    sql = """
+    SELECT YEAR(OrderTime) as OrderYear, MONTH(OrderTime) as OrderMonth, SUM(OrderPrice) as Bill
+    FROM CusOrder
+    WHERE CustomerID = {} AND CardNum IS NULL
+    GROUP BY OrderYear, OrderMonth
+    ORDER BY OrderYear DESC, OrderMonth DESC
+    """.format(cusid)
+    with connection.cursor() as cursor:
+        cursor.execute(sql)
+        rows = cursor.fetchall()
+    bills = [(row[0], row[1], row[2]) for row in rows]
+    context = {}
+    context = get_stock_sites(context)
+    context['bills'] = bills
+    context['siteloc'] = 'Monthly Bills'
+    return render(request, "cs425proj/account.html", context);

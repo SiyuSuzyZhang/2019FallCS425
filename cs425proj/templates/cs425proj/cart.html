@@ -25,7 +25,7 @@
                     </thead>
                     <tbody>
                         {% for cart_item in show_carts %}
-                        <tr>
+                        <tr id="{{ cart_item.0 }}">
                             <td class="cart_product">
                                 <!-- <a href=""><img src="images/cart/one.png" alt=""></a> -->
                             </td>
@@ -39,7 +39,7 @@
                             <td class="cart_quantity">
                                 <div class="cart_quantity_button">
                                     <a class="cart_quantity_down" href=""> - </a>
-                                    <input class="cart_quantity_input" type="text" name="quantity" value="{{ cart_item.4 }} " autocomplete="off" size="2">
+                                    <input class="cart_quantity_input" type="text" name="quantity" value="{{ cart_item.4 }} " autocomplete="off" size="2" disable>
                                     <a class="cart_quantity_up" href=""> + </a>
                                 </div>
                             </td>
@@ -92,7 +92,7 @@
 							{% if cart_total > 0 %}
 							<a class="btn btn-default check_out" href="/shop/{{shopat}}/checkout/">Checkout</a>
 							{% else %}
-							<a class="btn btn-primary" href="/shop/{{shopat}}/">Back to shop</a>
+							<a class="btn btn-primary check_out" href="/shop/{{shopat}}/">Back to shop</a>
 							{% endif %}
                     </div>
                 </div>

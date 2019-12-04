@@ -1,0 +1,13 @@
+
+<div class="col-sm-9">
+    <div class="blog-post-area">
+        <h2 class="title text-center">Montly Bills</h2>
+        {% for bill in bills %}
+        <div class="single-blog-post">
+            <h3>Month: {{bill.0}} - {{bill.1}}</h3>
+            <p>Total: $ {{bill.2}}</p>
+        </div>
+        <hr>
+        {% endfor %}
+    </div>
+</div>

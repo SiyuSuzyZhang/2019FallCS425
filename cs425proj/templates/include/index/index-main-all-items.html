@@ -1,21 +1,34 @@
 <div class="features_items"><!--features_items-->
     <h2 class="title text-center">All Products
         {% if bytype %}
-        {% for ptype in productTypes %}
-        {% if ptype.0 == bytype %}
-        ( {{ptype.1}} )
-        {% endif %}
-        {% endfor %}
+            {% for ptype in productTypes %}
+                {% if ptype.0 == bytype %}
+                ( {{ptype.1}} )
+                {% endif %}
+            {% endfor %}
         {% endif %}
         {% if bymanu %}
-        FROM 
-        {% for manu in manufacturers %}
-        {% if manu.0 == bymanu %}
-        {{manu.1}}
+            FROM 
+            {% for manu in manufacturers %}
+                {% if manu.0 == bymanu %}
+                {{manu.1}}
+                {% endif %}
+            {% endfor %}
         {% endif %}
-        {% endfor %}
+        {% if bypack %}
+            IN
+            {% for package in packages %}
+                {% if package.0 == bypack %}
+                {{package.1}}
+                {% endif %}
+            {% endfor %}
         {% endif %}
     </h2>
+    <div class="col-sm-12">
+        <h2 class="text-center">
+            <a href="#" class="btn btn-default add-to-cart check_out btn-add-package" id='{% for item in products %}{%if forloop.first %}{{item.0}}{%else%}-{{item.0}}{%endif%}{% endfor %}'><i class="fa fa-shopping-cart"></i>Add package to cart</a>
+        </h2>
+    </div>
     {% for item in products %}
         <div class="col-sm-4">
             <div class="product-image-wrapper">

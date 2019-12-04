@@ -1,0 +1,52 @@
+<script defer>
+$(document).ready(function(){
+    $("#update-account").on('click', function(e){
+        e.preventDefault();
+        var toedit = {};
+        var changed = false;
+        if ($("#edit-first-name").val().trim() != "" && $("#edit-first-name").val().trim() != "{{request.session.user.FirstName}}")
+        {
+            changed = true;
+            toedit['FirstName'] = $("#edit-first-name").val().trim();
+        }
+        if ($("#edit-last-name").val().trim() != "" && $("#edit-last-name").val().trim() != "{{request.session.user.LastName}}")
+        {
+            changed = true;
+            toedit['LastName'] = $("#edit-last-name").val().trim();
+        }
+        if ($("#edit-phone-number").val().trim() != "{%if request.session.user.PhoneNumber %}{{request.session.user.PhoneNumber}}{%endif%}")
+        {
+            changed = true;
+            toedit['PhoneNumber'] = $("#edit-phone-number").val().trim();
+        }
+        if ($("#edit-email").val().trim() != "{%if request.session.user.Email%}{{request.session.user.Email}}{%endif%}")
+        {
+            changed = true;
+            toedit['Email'] = $("#edit-email").val().trim();
+        }
+        if ($("#edit-password").val().trim() != "")
+        {
+            changed = true;
+            toedit['Password'] = $("#edit-password").val().trim();
+        }
+        if(!changed) {
+            location.reload();
+        } else {
+            $.ajax(
+                    {
+                        url: "/account/",
+                        type: 'POST',
+                        async: false,
+                        dataType: 'json',
+                        data: toedit,
+                        success: post_update
+                    }
+                );
+        }
+    });
+    function post_update(dat) {
+        location.reload();
+    };
+});
+
+    </script>

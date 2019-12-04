@@ -1,0 +1,50 @@
+<section id="do_action">
+        <div class="heading">
+            <h3>View and edit your information</h3>
+            <p>To edit, directly edit in the text boxes and hit submit</p>
+        </div>
+        <div class="row">
+            <div class="col-sm-9">
+                <div class="chose_area">
+                    <ul class="user_info">
+                        <li class="single_field zip-field">
+                            <label>First Name</label>
+                            <input type="text" id="edit-first-name" value="{{request.session.user.FirstName}}">
+                        </li>
+                    </ul>
+                    <ul class="user_info">
+                        <li class="single_field zip-field">
+                            <label>Last Name</label>
+                            <input type="text" id="edit-last-name" value="{{request.session.user.LastName}}">
+                        </li>
+                    </ul>
+                    <ul class="user_info">
+                        <li class="single_field zip-field">
+                            <label>Phone Number</label>
+                            <input type="text" id="edit-phone-number" value="{%if request.session.user.PhoneNumber %}{{request.session.user.PhoneNumber}}{%endif%}">
+                        </li>
+                    </ul>
+                    <ul class="user_info">
+                        <li class="single_field zip-field">
+                            <label>Username (Not support for editing as of now)</label>
+                            <input type="text" id="edit-username" value="{{request.session.user.Username}}" disabled>
+                        </li>
+                    </ul>
+                    <ul class="user_info">
+                        <li class="single_field zip-field">
+                            <label>E-mail</label>
+                            <input type="text" id="edit-email" value="{%if request.session.user.Email%}{{request.session.user.Email}}{%endif%}">
+                        </li>
+                    </ul>
+                    <ul class="user_info">
+                        <li class="single_field zip-field">
+                            <label>Password</label>
+                            <input type="password" id="edit-password">
+                        </li>
+                    </ul>
+                    <a class="btn btn-primary update" href="/account/">Cancel</a>
+                    <a class="btn btn-default update" href="" id='update-account'>Update</a>
+                </div>
+            </div>
+        </div>
+</section>
