@@ -5,13 +5,14 @@
 {% block content %}
 
 
+{% if siteloc == 'Showcase' %}
 {% include 'include/index/index-slider.html' %}
-    
+{% endif %}
 <section>
     <div class="container">
         <div class="row">
             <div class="col-sm-3">
-				{% include 'include/index/index-left-sidebar.html' %}
+                {% include 'include/index/index-left-sidebar.html' %}
             </div>
             
             <div class="col-sm-9 padding-right">

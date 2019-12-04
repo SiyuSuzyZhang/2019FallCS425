@@ -6,3 +6,96 @@
 <script src="{% static '/js/price-range.js' %}"></script>
 <script src="{% static '/js/jquery.prettyPhoto.js' %}"></script>
 <script src="{% static '/js/main.js' %}"></script>
+
+<script defer>
+$(document).ready(function(){
+    $(".add-to-cart").on('click', function(e){
+        e.preventDefault();
+        prodid = $(this).attr("id");
+        $.ajax(
+            {
+                url: "/shop/{{shopat}}/addToCart/",
+                type: 'POST',
+                async: true,
+                dataType: 'json',
+                data: {
+                    'action': 'add_one',
+                    'prodid': prodid,
+                },
+                success: addedCart
+            }
+        );
+    });
+
+    function addedCart(dat) {
+        items_in_cart = dat.total;
+        $("#items_in_cart").text(items_in_cart);
+    }
+
+    $("#checkout_account_confirm").on('click', function(e){
+        e.preventDefault();
+        var inputs = $("#checkout_account_form :input");
+        var req_account = {};
+        inputs.each(function(){
+            req_account[$(this).attr("placeholder")] = $(this).val();
+        });
+        $.ajax(
+            {
+                url: "/account/checkout_confirm_account/",
+                type: 'POST',
+                async: false,
+                dataType: 'json',
+                data: req_account,
+                success: post_checkout_account_confirm
+            }
+        );
+    });
+    
+    function post_checkout_account_confirm(dat) {
+        if (dat.success) {
+            location.reload();
+        } else {
+            alert("There is something wrong with your submitted account information, please try again")
+        }
+    };
+
+    $(".btn-check-out").on('click', function(e){
+        e.preventDefault()
+        var check_out_type = $(this).attr("type");
+        var payment_inputs = $("#checkout-payment :input");
+        var shipping = {};
+        var card;
+        payment_inputs.each(function(){
+            card = $(this).val();
+        })
+        if ({{shopat}} == 10001) {
+            shipping_inputs = $("#checkout-shipping :input");
+            shipping_inputs.each(function(){
+                shipping[$(this).attr("x")] = $(this).val()
+            });
+        }
+        $.ajax(
+            {
+                url: "/shop/{{shopat}}/doCheckout/",
+                type: 'POST',
+                async: false,
+                dataType: 'json',
+                data: {
+                    "type": check_out_type,
+                    "card": card,
+                    "shipping": shipping
+                },
+                success: post_checkout
+            }
+        )
+    });
+    function post_checkout(dat) {
+        if (dat.success) {
+
+        } else {
+            alert(dat.info);
+        }
+    }
+
+});
+</script>

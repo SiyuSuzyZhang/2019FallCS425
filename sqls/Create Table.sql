@@ -45,10 +45,10 @@ LOAD DATA INFILE '/home/siyu/2019FallCS425/initial_data/product_dat.csv' INTO TA
 
 CREATE TABLE Address
 (
-    AddressID INT(10) NOT NULL,
+    AddressID INT(10) NOT NULL AUTO_INCREMENT,
     StreetNumber VARCHAR(10) NOT NULL,
     Street VARCHAR(64) NOT NULL,
-    Line2 VARCHAR(64) DEFAULT NULL,
+    Line2 VARCHAR(64) DEFAULT '',
     City VARCHAR(32) NOT NULL,
     State VARCHAR(10) NOT NULL,
     Zipcode VARCHAR(6) NOT NULL,
@@ -59,7 +59,7 @@ LOAD DATA INFILE '/home/siyu/2019FallCS425/initial_data/address_dat.csv' INTO TA
 
 CREATE TABLE Stock
 (
-    SiteID INT(5) NOT NULL, 
+    SiteID INT(5) NOT NULL AUTO_INCREMENT, 
     StockType VARCHAR(10) NOT NULL, 
     AddressID INT(10) DEFAULT NULL,
     PRIMARY KEY (SiteID),
@@ -71,7 +71,7 @@ LOAD DATA INFILE '/home/siyu/2019FallCS425/initial_data/site_dat.csv' INTO TABLE
 
 CREATE TABLE Customer
 (
-    CustomerID INT(10) NOT NULL,
+    CustomerID INT(10) NOT NULL AUTO_INCREMENT,
     FirstName VARCHAR(10) NOT NULL,
     LastName VARCHAR(10) NOT NULL,
     PhoneNumber VARCHAR(15),
@@ -96,37 +96,39 @@ LOAD DATA INFILE '/home/siyu/2019FallCS425/initial_data/card_dat.csv' INTO TABLE
 
 CREATE TABLE Inventory
 (
-    ProductID INT(10) NOT NULL, 
+    ProductID INT(10) NOT NULL AUTO_INCREMENT, 
     SiteID INT(10) NOT NULL,
     ProductAmount INT(10) NOT NULL DEFAULT 0,
     PRIMARY KEY(ProductID, SiteID),
     FOREIGN KEY (ProductID) REFERENCES Product(ProductID),
-    FOREIGN KEY (SiteID) REFERENCES Stock(SiteID)
+    FOREIGN KEY (SiteID) REFERENCES Stock(SiteID),
+    CONSTRAINT chk_amount CHECK(ProductAmount >= 0)
 );
 
 LOAD DATA INFILE '/home/siyu/2019FallCS425/initial_data/inventory_dat.csv' INTO TABLE Inventory FIELDS TERMINATED BY ',';
 
 CREATE TABLE CusOrder
 (
-    OrderID INT(20) NOT NULL, 
+    OrderID INT(20) NOT NULL AUTO_INCREMENT, 
     OrderPrice INT(20) NOT NULL,
     SiteID INT(10) NOT NULL,
 
-    TrackingNumber CHAR(8) NOT NULL UNIQUE,
-    ShipperName VARCHAR(20) NOT NULL,
+    TrackingNumber CHAR(8) DEFAULT NULL,
+    ShipperName VARCHAR(20) DEFAULT NULL,
     
     CustomerID INT(10) DEFAULT NULL,
     
-    AddressID INT(10) NOT NULL,
+    AddressID INT(10) DEFAULT NULL,
     
-    CardNum CHAR(16) NOT NULL,
+    CardNum CHAR(16) DEFAULT NULL,
     
     OrderTime DATETIME NOT NULL,
     FOREIGN KEY (SiteID) REFERENCES Stock(SiteID),
     FOREIGN KEY (AddressID) REFERENCES Address(AddressID),
     FOREIGN KEY (CardNum) REFERENCES Card(CardNum),
     FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID),
-    PRIMARY KEY(OrderID)
+    PRIMARY KEY(OrderID),
+    CONSTRAINT chk_frequent CHECK(CustomerID is NOT NULL or CardNum is NOT NULL)
 );
 
 LOAD DATA INFILE '/home/siyu/2019FallCS425/initial_data/cusorder_dat.csv' INTO TABLE CusOrder FIELDS TERMINATED BY ',';

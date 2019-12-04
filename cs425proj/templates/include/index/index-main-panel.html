@@ -1,7 +1,13 @@
 
 
+{% if siteloc == 'Showcase' %}
 {% include 'include/index/index-main-feature-items.html' %}
 
 {% include 'include/index/index-main-category-tab.html' %}
 
 {% include 'include/index/index-main-recommended.html' %}
+{% endif %}
+
+{% if siteloc == 'Shop' %}
+{% include 'include/index/index-main-all-items.html' %}
+{% endif %}

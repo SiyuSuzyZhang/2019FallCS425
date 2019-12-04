@@ -1,0 +1,59 @@
+<div class="features_items"><!--features_items-->
+    <h2 class="title text-center">All Products
+        {% if bytype %}
+        {% for ptype in productTypes %}
+        {% if ptype.0 == bytype %}
+        ( {{ptype.1}} )
+        {% endif %}
+        {% endfor %}
+        {% endif %}
+        {% if bymanu %}
+        FROM 
+        {% for manu in manufacturers %}
+        {% if manu.0 == bymanu %}
+        {{manu.1}}
+        {% endif %}
+        {% endfor %}
+        {% endif %}
+    </h2>
+    {% for item in products %}
+        <div class="col-sm-4">
+            <div class="product-image-wrapper">
+                <div class="single-products">
+                        <div class="productinfo text-center">
+                            <!--<img src="images/home/product1.jpg" alt="" />-->
+                            <h2>$ {{item.2}}</h2>
+                            <p>{{item.1}}</p>
+                            <a href="#" class="btn btn-default add-to-cart" id='{{item.0}}'><i class="fa fa-shopping-cart"></i>Add to cart</a>
+                        </div>
+                        <div class="product-overlay">
+                            <div class="overlay-content">
+                                <h2>$ {{item.2}}</h2>
+                                <p>{{item.1}}</p>
+                                <a href="#" class="btn btn-default add-to-cart" id='{{item.0}}'><i class="fa fa-shopping-cart"></i>Add to cart</a>
+                            </div>
+                        </div>
+                </div>
+                <div class="choose">
+                    <ul class="nav nav-pills nav-justified">
+                        <li><a href="#"><i class="fa fa-plus-square"></i>Stock: {{item.3}}</a></li>
+                        <li><a href="#"><i class="fa fa-plus-square"></i>Details</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div><!--features_items-->
+
+<ul class="pagination">
+    {% if prevpage > 0 %}
+    <li><a href="{{cururl}}/page-{{prevpage}}">&laquo;</a></li>
+    {% endif %}
+    {% for pageid in pages %}
+    <li {% if pageid == curpage %}class="active" {% endif %}><a href="{{cururl}}/page-{{pageid}}">{{pageid}}</a></li>
+    {% endfor %}
+    {% if nextpage > 0 %}
+    <li><a href="{{cururl}}/page-{{nextpage}}">&raquo;</a></li>
+    {% endif %}
+</ul>
+

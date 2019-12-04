@@ -38,6 +38,9 @@ creations and initial data importing.
 Most of the data are created by Python under `util_scripts`.
 
 ```bash
+wget -c https://repo.mysql.com//mysql-apt-config_0.8.13-1_all.deb
+sudo dpkg -i mysql-apt-config_0.8.13-1_all.deb 
+# Select mysql-8.0
 sudo apt install libmysqlclient-dev mysql-server
 # Create database user
 sudo mysql

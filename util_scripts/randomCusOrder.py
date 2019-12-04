@@ -18,7 +18,7 @@ high_max = 50
 days = 700
 day_start = datetime(2018, 1, 1)
 
-shippers = ['Fedex', 'USPS', 'UPS', 'EMS']
+shippers = ['Fedex', 'USPS', 'UPS', 'EMS', 'DHL']
 products = {100001:30,100002:50,100003:70,100004:25,100005:45,100006:65,100007:85,100008:20,100009:40,100010:60,100011:150,100012:170,100013:250,100014:350,100015:160,100016:380,100017:700,100018:1100,100019:1900,100020:850,100021:1200,100022:2000,100023:40,100024:80,100025:120,100026:100,100027:150,100028:120,100029:180,100030:500,100031:700,100032:900,100033:1100,100034:1100,100035:900,100036:850,100037:800,100038:600,100039:150,100040:170,100041:200,100042:130,100043:160,100044:200,100045:220,100046:190,100047:250,100048:500,100049:700,100050:550,100051:750,100052:1200,100053:800,100054:1250,100055:1300,100056:1100,100057:1150,100058:1300,100059:1200,100060:200,100061:380,100062:700,100063:350,100064:230,100065:1100,100066:1800,100067:2500,100068:800,100069:1000,100070:1500,100071:700,100072:1700,100073:2000,100074:1200,100075:1200,100076:130,100077:180,100078:250,100079:200,100080:220,100081:230,100082:5000,100083:7000}
 
 ordernum = 1000001
@@ -62,11 +62,17 @@ for i in range(0, days+1):
     for j in range(0, daily):
         oid = ordernum
         ordernum += 1
-        siteID = site + random.randint(0, snum)
-        if siteID == site:
-            siteID += 1
-        tnum = random.randint(10000000, 99999999)
-        shipper = shippers[random.randint(0, 3)]
+        site_rng = random.randint(2, 17)
+        if site_rng <= 9:
+            siteID = site + site_rng
+        else:
+            siteID = site + 1
+        if siteID != 10001: # In store, so no tracking
+            tnum = "\\N"
+            shipper = "\\N"
+        else:
+            tnum = random.randint(10000000, 99999999)
+            shipper = shippers[random.randint(0, 3)]
 
         custype = random.randint(1, 10)
         if custype < 4:
@@ -75,21 +81,26 @@ for i in range(0, days+1):
             custype = 1
         creditcard = 1 if random.randint(1, 10) > 4 else 0
         if custype == 0:
-            cusid = ""
+            cusid = "\\N"
             addrid = random.randint(1000009, 1000079)
             if creditcard == 1:
                 cnum = "22223333444{}".format(credit + random.randint(1, creditnum))
             else:
                 cnum = "11112222333{}".format(debit + random.randint(1, debitnum))
-        else:
+        else: # frequent
             cusnum = random.randint(1000001, 1000057)
             cusid = "{}".format(cusnum)
-            if creditcard == 1:
-                cnum = "22223333444{}".format(credit + cusnum-1000001 + 10)
+            bill_later = random.randint(1, 100) > 27
+            if bill_later:
+                cnum = "\\N"
             else:
-                cnum = "11112222333{}".format(debit + cusnum-1000001 + 10)
+                if creditcard == 1:
+                    cnum = "22223333444{}".format(credit + cusnum-1000001 + 10)
+                else:
+                    cnum = "11112222333{}".format(debit + cusnum-1000001 + 10)
             addrid = 1000009 + cusnum-1000001
-        
+        if siteID != 10001: #in-store order
+            addrid = "\\N"
 
         hr = random.randint(0, 23)
         mi = random.randint(0, 59)
@@ -97,7 +108,7 @@ for i in range(0, days+1):
         order_price = generateOrderFor(oid)
 
         order_datetime = datetime(thisday.year, thisday.month, thisday.day, hr, mi, ss)
-        co_f.write("{},{},{},{},{},{},{},{},{}\n".format(oid, order_price, siteID, tnum, shipper,
+        co_f.write('{},{},{},{},{},{},{},{},{}\n'.format(oid, order_price, siteID, tnum, shipper,
                                         cusid, addrid, cnum, order_datetime))   
 
 of_f.close()

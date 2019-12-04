@@ -1,6 +1,6 @@
 # Queries
 
-## Index page
+## Index page (The Showcase page)
 
 -- Query all product types
 SELECT * FROM  ProductType ORDER BY TypeName;
@@ -52,6 +52,26 @@ LIMIT 4;
 SELECT SiteID, StockType, City, State
 FROM Stock
 LEFT JOIN Address USING(AddressID);
+
+## Shop page
+
+-- Query all products and their inventory given a siteid
+SELECT ProductID, ProductName, ProductPrice, ProductAmount
+FROM Product
+LEFT JOIN Inventory USING(ProductID)
+WHERE Inventory.SiteID = 10001
+LIMIT 10 15;
+
+-- For the purpose of pagination, we need to get the number of products first
+SELECT count(*) FROM Product;
+
+
+## Cart page
+-- Get product names, price, and stock for a certain site id
+SELECT ProductID, ProductName, ProductPrice, ProductAmount
+FROM Product
+LEFT JOIN Inventory USING(ProductID)
+WHERE Inventory.SiteID = 10001 AND ProductID in (100001, 100002);
 
 ### Sign in
 
