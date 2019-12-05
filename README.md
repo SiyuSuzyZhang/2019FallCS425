@@ -53,8 +53,6 @@ FLUSH PRIVILEGES;
 ```
 
 ```bash
-# Login again with the new user cs425proj
-mysql -u cs425proj -p
 # Import "Create Table.sql"  to initialize databse and import initial data
 mysql -u cs425proj -p < "sqls/Create Table.sql"
 ```
@@ -83,11 +81,11 @@ pip install -r requirements.txt
 ```bash
 # under cs425proj
 # first time only
-python manage.py migrate
+~/.virtualenvs/cs425/bin/python manage.py migrate
 # start mysql
 sudo service mysql start
 # start server
-python manage.py runserver_plus
+~/.virtualenvs/cs425/bin/python manage.py runserver_plus
 ```
 
 Open local browser and go to `localhost:8000`
@@ -101,6 +99,7 @@ Account No: 1234567890
 Username: testuser
 Password: 123456
 Card Number: 1111222233334444 for low credit/balance test
+             1111222233330001 has high credit/balance
 ```
 
 ## III. Organization
