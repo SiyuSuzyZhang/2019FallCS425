@@ -12,25 +12,11 @@ Execute the following commands to install necessary packages:
 sudo apt update
 sudo apt install build-essential python3 python3-dev python3-distutils libssl-dev
 curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py; sudo -H python3 get-pip.py
+
+git clone https://github.com/SiyuSuzyZhang/2019FallCS425.git
 ```
 
-### 1.2. Application
-
-(optional) Install virtualenvwrapper for easy management 
-
-```bash
-sudo -H pip install virtualenvwrapper
-source /usr/local/bin/virtualenvwrapper.sh
-mkvirtualenv cs425
-```
-
-Install requirement.txt
-
-```bash
-pip install -r requirements.txt
-```
-
-### 1.3. Database
+### 1.2. Database
 
 We are using MySQL, and import an SQL file which includes database, table
 creations and initial data importing.
@@ -40,7 +26,7 @@ Most of the data are created by Python under `util_scripts`.
 ```bash
 wget -c https://repo.mysql.com//mysql-apt-config_0.8.14-1_all.deb
 sudo dpkg -i mysql-apt-config_0.8.14-1_all.deb 
-# If using WSL, Select mysql-5.0 first
+# If using WSL, Select mysql-5.7 first
 sudo apt update
 sudo apt install mysql-server
 # Now select mysql-8.0
@@ -52,7 +38,10 @@ sudo apt install libmysqlclient-dev
 sudo vi /etc/init.d/mysql
 # (search for a line ". /usr/share/mysql/mysql-helpers" and change it to
 # ". /usr/share/mysql-8.0/mysql-helpers")
-sudo service start mysql
+sudo vi /etc/mysql/mysql.conf.d/mysqld.cnf
+# add at the end
+# secure_file_priv = ""
+sudo service mysql start
 # Create database user
 sudo mysql -u root -p
 ```
@@ -69,12 +58,34 @@ mysql -u cs425proj -p
 # Import "Create Table.sql"  to initialize databse and import initial data
 mysql -u cs425proj -p < "sqls/Create Table.sql"
 ```
+
+### 1.3. Application
+
+(optional) Install virtualenvwrapper for easy management 
+
+```bash
+sudo -H pip install virtualenvwrapper
+source /usr/local/bin/virtualenvwrapper.sh
+mkvirtualenv cs425
+workon cs425
+
+```
+
+Install requirement.txt
+
+```bash
+pip install -r requirements.txt
+```
+
+
 ## II. Start your application
 
 ```bash
 # under cs425proj
 # first time only
 python manage.py migrate
+# start mysql
+sudo service mysql start
 # start server
 python manage.py runserver_plus
 ```
