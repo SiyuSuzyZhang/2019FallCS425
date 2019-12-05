@@ -80,6 +80,7 @@ pip install -r requirements.txt
 
 ```bash
 # under cs425proj
+cd 2019FallCS425/cs425proj
 # first time only
 ~/.virtualenvs/cs425/bin/python manage.py migrate
 # start mysql
