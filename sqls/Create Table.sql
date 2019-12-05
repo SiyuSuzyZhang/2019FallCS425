@@ -11,7 +11,7 @@ CREATE TABLE ProductType
     PRIMARY KEY(TypeID)
 );
 
-LOAD DATA INFILE '/home/siyu/2019FallCS425/initial_data/producttype_dat.csv' INTO TABLE ProductType FIELDS TERMINATED BY ',';
+LOAD DATA INFILE '/home/siyu/2019FallCS425/initial_data/producttype_dat.csv' INTO TABLE ProductType FIELDS TERMINATED BY ',' LINES TERMINATED BY '\r\n';
 
 CREATE TABLE Manufacturer
 (
@@ -20,7 +20,7 @@ CREATE TABLE Manufacturer
     PRIMARY KEY(ManufacturerID)
 );
 
-LOAD DATA INFILE '/home/siyu/2019FallCS425/initial_data/manufacturer_dat.csv' INTO TABLE Manufacturer FIELDS TERMINATED BY ',';
+LOAD DATA INFILE '/home/siyu/2019FallCS425/initial_data/manufacturer_dat.csv' INTO TABLE Manufacturer FIELDS TERMINATED BY ',' LINES TERMINATED BY '\r\n';
 
 CREATE TABLE Package
 (
@@ -29,7 +29,7 @@ CREATE TABLE Package
     PRIMARY KEY(PackageID)
 );
 
-LOAD DATA INFILE '/home/siyu/2019FallCS425/initial_data/package_dat.csv' INTO TABLE Package FIELDS TERMINATED BY ',';
+LOAD DATA INFILE '/home/siyu/2019FallCS425/initial_data/package_dat.csv' INTO TABLE Package FIELDS TERMINATED BY ',' LINES TERMINATED BY '\r\n';
 
 CREATE TABLE Product 
 (
@@ -55,7 +55,7 @@ CREATE TABLE Address
     PRIMARY KEY(AddressID)
 );
 
-LOAD DATA INFILE '/home/siyu/2019FallCS425/initial_data/address_dat.csv' INTO TABLE Address FIELDS TERMINATED BY ',';
+LOAD DATA INFILE '/home/siyu/2019FallCS425/initial_data/address_dat.csv' INTO TABLE Address FIELDS TERMINATED BY ',' LINES TERMINATED BY '\r\n';
 
 CREATE TABLE Stock
 (
@@ -82,7 +82,7 @@ CREATE TABLE Customer
     PRIMARY KEY(CustomerID)
 );
 
-LOAD DATA INFILE '/home/siyu/2019FallCS425/initial_data/customer_dat.csv' INTO TABLE Customer FIELDS TERMINATED BY ',';
+LOAD DATA INFILE '/home/siyu/2019FallCS425/initial_data/customer_dat.csv' INTO TABLE Customer FIELDS TERMINATED BY ',' LINES TERMINATED BY '\r\n';
 
 CREATE TABLE Card
 (
