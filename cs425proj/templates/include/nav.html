@@ -14,7 +14,7 @@
                 <div class="col-sm-8">
                     <div class="shop-menu pull-right">
                         <ul class="nav navbar-nav">
-                            <li><a href="{% if request.session.loggedin %}/account/{%else%}/login/{%endif%}"
+                            <li><a href="/account/"
                                 {% if siteloc == 'Account' or siteloc == 'My Orders' or siteloc == 'Monthly Bills' %} class='active' {%endif%}
                                 ><i class="fa fa-user"></i> Account</a></li>
                             <li><a href="

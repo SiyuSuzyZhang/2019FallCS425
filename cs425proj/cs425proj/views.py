@@ -1102,3 +1102,77 @@ def bills(request):
     context['bills'] = bills
     context['siteloc'] = 'Monthly Bills'
     return render(request, "cs425proj/account.html", context);
+
+def report_low_stock(request):
+    sql = """
+        SELECT ProductID, ProductName, ManufacturerName, ProductAmount,
+                SiteID, StockType, StreetNumber, Street, City, State, Zipcode
+        FROM Product
+        LEFT JOIN Manufacturer USING (ManufacturerID)
+        LEFT JOIN Inventory USING (ProductID)
+        LEFT JOIN Stock USING (SiteID)
+        LEFT JOIN Address USING (AddressID)
+        WHERE Inventory.ProductAmount < 10;
+    """
+    with connection.cursor() as cursor:
+        cursor.execute(sql)
+        rows = cursor.fetchall()
+    low_stock_items = [
+        {
+            'ProductID': row[0],
+            'ProductName': row[1],
+            'ManufacturerName': row[2],
+            'ProductAmount': row[3],
+            'SiteID': row[4],
+            'StockType': row[5],
+            'StreetNumber': row[6],
+            'Street': row[7],
+            'City': row[8],
+            'State': row[9],
+            'Zipcode': row[10]
+        } for row in rows
+    ]
+    context = {}
+    context = get_stock_sites(context)
+    context["low_stock_items"] = low_stock_items
+    context["siteloc"] = "Stock Manage"
+    return render(request, "cs425proj/lowstock.html", context)
+
+@csrf_exempt
+def restock_100(request):
+    if request.method == 'POST':
+        post_data = request.POST.dict()
+        msg = post_data['msg']
+        parts = msg.split("-")
+        ProductID = parts[0]
+        SiteID = parts[1]
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT ManufacturerName
+                FROM Product
+                JOIN Manufacturer USING (ManufacturerID)
+                WHERE ProductID = {}
+            """.format(ProductID))
+            row = cursor.fetchone()
+        if row:
+            ManuName = row[0]
+        else:
+            ManuName = "Unknown"
+        sql = """
+            UPDATE Inventory
+            SET ProductAmount = ProductAmount + 100
+            WHERE ProductID = {} AND SiteID = {}
+        """.format(ProductID, SiteID)
+        success = True
+        info = ManuName
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(sql)
+        except Exception as e:
+            success = False
+            info = e.args
+        ret_dat = json.dumps({
+            'success': success,
+            'info': info
+        })
+        return HttpResponse(ret_dat, content_type='application/json')

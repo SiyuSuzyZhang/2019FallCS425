@@ -89,6 +89,7 @@ Last Name: User
 Account No: 1234567890
 Username: testuser
 Password: 123456
+Card Number: 1111222233334444 for low credit/balance test
 ```
 
 ## III. Organization
@@ -219,4 +220,16 @@ ENTRY: views.report1(request)
 URL: /report/report2/
 INFO: Show montly change sale report
 ENTRY: views.report2(request)
+```
+
+```
+URL: /report/lowstock/
+INFO: Show low stock (<10) items
+ENTRY: views.report_low_stock(request)
+```
+
+```
+URL: /report/restock_100/ (!don't open directly)
+INFO: restock requested items by 100 via POST from lowstock page
+ENTRY: views.restock_100(request)
 ```

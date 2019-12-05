@@ -1,0 +1,26 @@
+<script>
+$(".btn-restock").on('click', function(e){
+            e.preventDefault();
+            msg = $(this).attr('id');
+            $.ajax(
+                {
+                    url: "/report/restock_100/",
+                    type: 'POST',
+                    async: true,
+                    dataType: 'json',
+                    data: {
+                        'msg': msg
+                    },
+                    success: restocked
+                }
+            );
+        });
+        function restocked(dat){
+            if (dat.success){
+                alert("Successfully ordered restock from "+dat.info);
+                location.reload();
+            } else{
+                alert("Something wrong: " + data.info);
+            }
+        };
+</script>

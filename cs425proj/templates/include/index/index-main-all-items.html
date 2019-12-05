@@ -24,11 +24,13 @@
             {% endfor %}
         {% endif %}
     </h2>
+    {%if bypack %}
     <div class="col-sm-12">
         <h2 class="text-center">
             <a href="#" class="btn btn-default add-to-cart check_out btn-add-package" id='{% for item in products %}{%if forloop.first %}{{item.0}}{%else%}-{{item.0}}{%endif%}{% endfor %}'><i class="fa fa-shopping-cart"></i>Add package to cart</a>
         </h2>
     </div>
+    {% endif %}
     {% for item in products %}
         <div class="col-sm-4">
             <div class="product-image-wrapper">

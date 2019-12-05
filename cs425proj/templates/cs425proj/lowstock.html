@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+<section>
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-3">
+                {% include 'include/report/report-left-sidebar.html' %}
+            </div>
+            
+            <div class="col-sm-9 padding-right">
+				{% include 'include/report/report-main-lowstock.html' %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}
+
+{% block cus-js-1 %}
+{% include 'include/report/lowstock-js.html' %}
+{% endblock cus-js-1 %}

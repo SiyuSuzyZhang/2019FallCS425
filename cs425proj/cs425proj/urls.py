@@ -44,6 +44,8 @@ urlpatterns = [
     path('report/', views.report, name='report'),
     path('report/report1/', views.report1, name='report'),
     path('report/report2/', views.report2, name='report'),
+    path('report/lowstock/', views.report_low_stock, name='report'),
+    path('report/restock_100/', views.restock_100, name='report'),
     re_path(r'shop/(?P<siteid>[0-9]{5})/login/$', views.login, name='account'),
     re_path(r'shop/(?P<siteid>[0-9]{5})/doLoginOrSignup/$', views.doLoginOrSignup, name='account'),
 ]

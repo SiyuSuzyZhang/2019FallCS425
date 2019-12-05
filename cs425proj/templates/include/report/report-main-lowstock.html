@@ -1,0 +1,26 @@
+
+<div class="col-sm-9">
+    <div class="blog-post-area">
+        <h2 class="title text-center">Low Stock Alert ({{low_stock_items|length}})</h2>
+        {% for item in low_stock_items %}
+        <div class="single-blog-post">
+            <h3>{{item.ProductName}}({{item.ProductID}})</h3>
+            <div class="post-meta">
+                <ul>
+                    <li><i class="fa fa-user"></i> {{item.ManufacturerName}}</li>
+                    <li><i class="fa fa-clock-o"></i> Restock Immediately</li>
+                </ul>
+            </div>
+            <p>Only {{item.ProductAmount}} at {{item.StockType}}
+                {% if item.State %} <br/>
+                {{item.StreetNumber}} {{item.Street}} <br/>{{item.City}}, {{item.State}}, {{item.Zipcode}}
+                {% endif %}
+            </p>
+            <a  class="btn btn-primary check_out btn-restock" 
+            id="{{item.ProductID}}-{{item.SiteID}}"
+            href="#">Restock 100</a>
+        </div>
+        <hr>
+        {% endfor %}
+    </div>
+</div>
