@@ -1036,7 +1036,7 @@ def report2(request):
             SELECT OrderTime, OrderPrice
             From CusOrder
         )
-    SELECT ThisPrices.OrderYear, ThisPrices.OrderMonth, (ThisSales - LastSales)/ThisSales*100
+    SELECT ThisPrices.OrderYear, ThisPrices.OrderMonth, (ThisSales - LastSales)/LastSales*100
     FROM
     (
         SELECT YEAR(OrderTime) AS OrderYear, MONTH(OrderTime) as OrderMonth, SUM(ThisPrice) as ThisSales
